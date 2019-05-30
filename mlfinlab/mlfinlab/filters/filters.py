@@ -6,10 +6,11 @@ to some event horizon, say a day.
 
 import numpy as np
 import pandas as pd
+import datetime
 
 
 # Snippet 2.4, page 39, The Symmetric CUSUM Filter.
-def cusum_filter(raw_time_series, threshold, time_stamps=True):
+def cusum_filter(raw_time_series, daily_vol, time_stamps=True):
     """
     Snippet 2.4, page 39, The Symmetric CUSUM Filter.
 
@@ -47,7 +48,9 @@ def cusum_filter(raw_time_series, threshold, time_stamps=True):
     diff = np.log(raw_time_series).diff()
 
     # Get event time stamps for the entire series
+    threshold = daily_vol.values[1]
     for i in diff.index[1:]:
+        prev_day = i - datetime.timedelta(days=7)
         pos = float(s_pos + diff.loc[i])
         neg = float(s_neg + diff.loc[i])
         s_pos = max(0.0, pos)
@@ -60,6 +63,12 @@ def cusum_filter(raw_time_series, threshold, time_stamps=True):
         elif s_pos > threshold:
             s_pos = 0
             t_events.append(i)
+        try:
+            threshold = daily_vol.loc[prev_day:i].mean()
+        except IndexError as e:
+            print(e)
+            continue
+
 
     # Return DatetimeIndex or list
     if time_stamps:
