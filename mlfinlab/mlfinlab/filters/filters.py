@@ -10,7 +10,7 @@ import datetime
 
 
 # Snippet 2.4, page 39, The Symmetric CUSUM Filter.
-def cusum_filter(raw_time_series, daily_vol, time_stamps=True):
+def cusum_filter(raw_time_series, daily_vol_mean, time_stamps=True):
     """
     Snippet 2.4, page 39, The Symmetric CUSUM Filter.
 
@@ -48,9 +48,18 @@ def cusum_filter(raw_time_series, daily_vol, time_stamps=True):
     diff = np.log(raw_time_series).diff()
 
     # Get event time stamps for the entire series
-    threshold = daily_vol.values[1]
+    threshold = daily_vol_mean.values[0]
+    cur_date = prev_date = diff.index[0].date()
     for i in diff.index[1:]:
-        prev_day = i - datetime.timedelta(days=7)
+        # update threshold
+        cur_date = i.date()
+        if cur_date > prev_date:
+            prev_date = cur_date
+            try:
+                threshold = daily_vol_mean.loc[i]
+            except KeyError as e:
+                print(e)
+
         pos = float(s_pos + diff.loc[i])
         neg = float(s_neg + diff.loc[i])
         s_pos = max(0.0, pos)
@@ -63,11 +72,6 @@ def cusum_filter(raw_time_series, daily_vol, time_stamps=True):
         elif s_pos > threshold:
             s_pos = 0
             t_events.append(i)
-        try:
-            threshold = daily_vol.loc[prev_day:i].mean()
-        except IndexError as e:
-            print(e)
-            continue
 
 
     # Return DatetimeIndex or list
