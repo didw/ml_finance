@@ -3,6 +3,8 @@ import pandas as pd
 
 
 def get_time_decay(tw, last_w=1., truncate=0, is_exp=False):
+    # apply piecewise-linear decay to observed uniqueness (tW)
+    # newest observation gets weight=1, oldest observation gets weight=clfLastW
     cum_w = tw.sort_index().cumsum()
     init_w = 1.
     if is_exp:
@@ -16,7 +18,7 @@ def get_time_decay(tw, last_w=1., truncate=0, is_exp=False):
     const = init_w - slope * cum_w.iloc[-1]
     weights = const + slope * cum_w
     if is_exp:
-        weights =np.exp(weights)
+        weights = np.exp(weights)
     weights[weights < truncate] = 0
     return weights
 

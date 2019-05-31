@@ -5,6 +5,8 @@ from ..multiprocessing import mp_pandas_obj
 
 
 def mp_sample_weight(series, t1, num_co_events, molecule):
+    """ Derive average uniqueness over the event's lifespan
+    """
     weight = pd.Series(index=molecule)
     for t_in, t_out in t1.loc[weight.index].iteritems():
         weight.loc[t_in] = (

@@ -1,6 +1,6 @@
 import numpy as np
 
-from scipy.sparse import csr_matrix
+from scipy.sparse import lil_matrix
 from tqdm import tqdm
 
 
@@ -17,8 +17,18 @@ def get_baridx_t1(bar, t_events):
             list_beg.append(t0_)
             list_end.append(t1_)
 
-        except Exception as e: 
-            print(i)
+        except Exception as e:
+            try:
+                idx_ = bar.loc[:i.Index].index[-1]
+                t1_ = bar.loc[:i.t1].index[-1]
+                t0_ = bar.index.get_loc(idx_)
+                t1_ = bar.index.get_loc(t1_)
+                list_beg.append(t0_)
+                list_end.append(t1_)
+            except Exception as e:
+                print(e)
+                print(i)
+
 
 
     beg_arr = np.array(list_beg)
@@ -40,7 +50,7 @@ def get_ind_matrix(bar_ix, t1, verbose=True):
     try:
         n_row = len(bar_ix)
         n_col = len(t1)
-        mat = csr_matrix((n_row, n_col), dtype='b')
+        mat = lil_matrix((n_row, n_col), dtype='b')
 
         for i, (t0, t1) in tqdm(enumerate(t1.iteritems()), position=0, disable=not verbose):
             mat[t0:t1 + 1, i] = 1
