@@ -46,7 +46,7 @@ def get_gaussian_betsize(prob, num_classes=2):
     """
     if isinstance(prob, numbers.Number):
         if prob != 0 and prob != 1:
-            signal = (prob - 1. / num_classes) / (prob * (1 - prob))
+            signal = (prob - 1. / num_classes) / ((prob * (1 - prob))**.5)
         else:
             signal = 2 * prob - 1
     else:

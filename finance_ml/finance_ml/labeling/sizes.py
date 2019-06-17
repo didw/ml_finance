@@ -107,11 +107,12 @@ def get_signal(prob,
     # Get Signals
     if prob.shape[0] == 0:
         return pd.Series()
-    signal = (prob - 1. / num_classes) / (prob * (1 - prob))
+    # signal = (prob - 1. / num_classes) / (prob * (1 - prob))
     signal = pd.Series(
         get_gaussian_betsize(prob, num_classes), index=prob.index)
-    if events and 'side' in events:
+    if events is not None and 'side' in events.columns:
         signal = signal * events.loc[signal.index, 'side']
+        signal = avg_active_signals(signal)
     if step_size is not None:
         signal = discrete_signal(signal, step_size=step_size)
     signal = scale * signal
